@@ -40,19 +40,19 @@ var GAME_ROOT = '/dotsandboxes/';
 var MAX_PLAYERS = 4;
 
 //------------------------------------------------------------------------------
-/* REDIRECT root to timbiriche */
+// REDIRECT root to timbiriche
 router.get('/', function(req, res) {
   res.redirect(GAME_ROOT);
 });
 
 //------------------------------------------------------------------------------
-/* GET index */
+// GET index
 router.get(GAME_ROOT, function (req, res) {
   res.render('index.ejs');
 });
 
 //------------------------------------------------------------------------------
-/* POST create_game */
+// POST create_game 
 router.post(GAME_ROOT + 'create_game/', function (req, res) {
 
   var result = { created: false, code: 'invalid' };
@@ -112,7 +112,7 @@ router.post(GAME_ROOT + 'create_game/', function (req, res) {
 });
 
 //------------------------------------------------------------------------------
-/* GET state */
+// GET state
 router.get(GAME_ROOT + 'state/', function (req, res) {
 
   var result = { state: 'error'};
@@ -241,7 +241,7 @@ router.get(GAME_ROOT + 'state/', function (req, res) {
 });
 
 //------------------------------------------------------------------------------
-/* GET available_games */
+// GET available_games
 router.get(GAME_ROOT + 'available_games/', function (req, res) {
   Game
     .find({ started: false })
@@ -257,7 +257,7 @@ router.get(GAME_ROOT + 'available_games/', function (req, res) {
 });
 
 //------------------------------------------------------------------------------
-/* PUT play */
+// PUT play
 router.put(GAME_ROOT + 'play/', function (req, res) {
 
   var result = { done: false };
@@ -379,7 +379,7 @@ router.put(GAME_ROOT + 'play/', function (req, res) {
 });
 
 //------------------------------------------------------------------------------
-/* PUT join_game */
+// PUT join_game
 router.put(GAME_ROOT + 'join_game/', function (req, res) {
 
   var result = { joined: false, code: 'bad_id' };

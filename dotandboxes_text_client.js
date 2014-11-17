@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-
 /*
  Dots and Boxes Game
  Text Client.
@@ -29,18 +28,16 @@ var request				 = require('request');
 //------------------------------------------------------------------------------
 var stdin					 = process.stdin;
 var stdout				 = process.stdout;
-var PAUSA					 = 1000;					// Miliseconds between each waiting request.
+var PAUSE					 = 1000;					// Miliseconds between each waiting request.
 
 //------------------------------------------------------------------------------
 // Web Service Requests Object Constructor.
-
 function webServiceCaller(host) {
 	
 	var cookiesSession = null;
 	
 	//------------------------------------------------------------------------------
 	function getCookies(res) {
-		
 		var setCookiesValue = res.headers['set-cookies'];
 		
 		if(setCookiesValue) {
@@ -54,8 +51,8 @@ function webServiceCaller(host) {
 	
 	//------------------------------------------------------------------------------
 	function headers(method) {
-		
 		var r = {};
+		
 		if(method !== 'GET') {
 			r['Content-type'] = 'application/x-www-form-urlencoded';
 		}
@@ -66,9 +63,8 @@ function webServiceCaller(host) {
 		return r;
 	}
 	
+	//------------------------------------------------------------------------------
 	return {
-		
-		//------------------------------------------------------------------------------
 		call: function (method, route, params, callback) {
 			
 			var options = {
@@ -89,7 +85,7 @@ function webServiceCaller(host) {
 						fatalError('Not OK status code (' + res.statusCode + ')');
 					}
 					
-					obtenerCookies(res);
+					getCookies(res);
 					callback(JSON.parse(body));
 			});
 		}

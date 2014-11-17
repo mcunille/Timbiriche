@@ -460,26 +460,26 @@ function challenger(game, symbol) {
 }
 
 //------------------------------------------------------------------------------
-function obtenerJuegoJugador(req, callback) {
+function getGamePlayer(req, callback) {
 
-  var idJugador = req.session.id_jugador;
-  var juego;
-  var jugador;
+  var playerId = req.session.id_player;
+  var game;
+  var player;
 
-  if (idJugador) {
+  if (playerId) {
     async.waterfall([
       //------------------------------------------------------------------------
       function (callback) {
-        Jugador.findOne({ _id: idJugador }, callback);
+        Player.findOne({ _id: playerId }, callback);
       },
       //------------------------------------------------------------------------
-      function (_jugador, callback) {
-        jugador = _jugador;
-        Juego.findOne({ _id: jugador.juego }, callback);
+      function (_player, callback) {
+        player = _player;
+        Game.findOne({ _id: player.game }, callback);
       },
       //------------------------------------------------------------------------
-      function (_juego, callback) {
-        juego = _juego;
+      function (_game, callback) {
+        game = _game;
         callback(null);
       }
     ],
@@ -488,9 +488,9 @@ function obtenerJuegoJugador(req, callback) {
       if (err) {
         console.log(err);
       }
-      callback(null, juego, jugador);
+      callback(null, game, player);
     });
   } else {
-    callback(Error('La sesión no contiene el ID del jugador'));
+    callback(Error('There is no session for the player ID'));
   }
 }
