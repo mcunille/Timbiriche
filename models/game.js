@@ -19,13 +19,14 @@
  
  'use strict'
  
- var mongoose = requiere('mongoose');
+ var mongoose = require('mongoose');
  
  //-------------------------------------------------------------------------------
  var gameSchema = mongoose.Schema({
  		 name: String,
- 		 turn: type: String,
- 		 board: type: String,
+ 		 turn: String,
+ 		 board: String,
+ 		 players: Number,
  		 started: { type: Boolean, default: false }
  });
  
@@ -50,7 +51,7 @@
  	 for(var i = 0; i < boardLength; i++) {
  	 	 boardArray[i] = [];
  	 	 
- 	 	 for(var j = 0; j < boardLength: j++) {
+ 	 	 for(var j = 0; j < boardLength; j++) {
  	 	 	 (i + j) % 2 === 0 ? boardArray[i][j] = '.' : boardArray[i][j] = ' ';	 
  	 	 }
  	 }
