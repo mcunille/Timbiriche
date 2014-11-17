@@ -23,9 +23,9 @@
  //-------------------------------------------------------------------------------
  var gameSchema = mongoose.Schema({
  		 name: String,
- 		 started: { type: Boolean, default: false },
- 		 turn: { type: String, default: '0' },
- 		 board: { type: String, default: JSON.stringify(createBoard(5)) }
+ 		 turn: type: String,
+ 		 board: type: String,
+ 		 started: { type: Boolean, default: false }
  });
  
  //-------------------------------------------------------------------------------
@@ -42,9 +42,9 @@
  module.exports = mongoose.model('Game', gameSchema);
  
  //-------------------------------------------------------------------------------
- function createBoard(x) {
+ function createBoardString(size) {
  	 var boardArray = [];
- 	 var boardLength = (2 * x) - 1;
+ 	 var boardLength = (2 * size) - 1;
  	 
  	 for(var i = 0; i < boardLength; i++) {
  	 	 boardArray[i] = [];
@@ -54,5 +54,5 @@
  	 	 }
  	 }
  	 
- 	 return boardArray;
+ 	 return JSON.stringify(boardArray);
  }

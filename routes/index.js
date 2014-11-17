@@ -25,7 +25,6 @@ var express    = require('express');
 var router     = express.Router();
 var async      = require('async');
 var mongoose   = require('mongoose');
-var constants = require('../models/constants.js');
 var Game      = require('../models/game.js');
 var Player    = require('../models/player.js');
 

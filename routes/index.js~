@@ -25,9 +25,9 @@ var express    = require('express');
 var router     = express.Router();
 var async      = require('async');
 var mongoose   = require('mongoose');
-var constantes = require('../models/constants.js');
-var Juego      = require('../models/game.js');
-var Jugador    = require('../models/player.js');
+var constants = require('../models/constants.js');
+var Game      = require('../models/game.js');
+var Player    = require('../models/player.js');
 
 module.exports = router;
 
@@ -36,100 +36,95 @@ module.exports = router;
 var ObjectId   = mongoose.Schema.Types.ObjectId;
 var ABORT    = true;
 
-//------------------------------------------------------------------------------
-// REDIRECT root to timbiriche
+var GAME_ROOT = '/dotsandboxes/';
+
+/* REDIRECT root to timbiriche */
 router.get('/', function(req, res) {
-  res.redirect('/timbiriche/');
+  res.redirect(GAME_ROOT);
 });
 
-
-router.get('/', function(req, res) {
-  res.render('index', { title: 'Express' });
-});
-
-module.exports = router;
-
-
-//------------------------------------------------------------------------------
-router.get('/gato/', function (req, res) {
+/* GET index */
+router.get(GAME_ROOT, function (req, res) {
   res.render('index.ejs');
 });
 
-//------------------------------------------------------------------------------
-router.post('/gato/crear_juego/', function (req, res) {
+/* POST create_game */
+router.post(GAME_ROOT + 'create_game/', function (req, res) {
 
-  var resultado = { creado: false, codigo: 'invalido' };
-  var nombre = req.body.nombre;
-  var juego;
-  var jugador;
+  var result = { created: false, code: 'invalid' };
+  var name = req.body.name;
+  var size = req.body.size;
+  var player_symbol = req.body.symbol;
+  var game;
+  var player;
 
-  if (nombre) {
+  if (name) {
     async.waterfall([
       //------------------------------------------------------------------------
       function (callback) {
-        Juego.find({ nombre: nombre, iniciado: false }, callback);
+        Game.find({ name: name, started: false}, callback);
       },
       //------------------------------------------------------------------------
-      function (juegos, callback) {
-        if (juegos.length === 0) {
-          juego = new Juego({nombre: nombre});
-          juego.save(callback);
+      function (games, callback) {
+        if (games.length === 0) {
+          game = new Game({
+          	name: name, 
+          	turn: player_symbol, 
+          	board: Game.createBoardString(size)});
+          game.save(callback);
         } else {
-          resultado.codigo = 'duplicado';
-          callback(ABORTAR);
+          result.code = 'duplicate';
+          callback(ABORT);
         }
       },
       //------------------------------------------------------------------------
-      function (_juego, _n, callback) {
-        jugador = new Jugador(
-          { juego: juego._id,
-            simbolo: constantes.SIMBOLO[0]
-          }
-        );
-        jugador.save(callback);
+      function (_game, _n, callback) {
+        player = new Player({ 
+        		game: game._id,
+            symbol: player_symbol});
+        player.save(callback);
       },
       //------------------------------------------------------------------------
-      function (_jugador, _n, callback) {
-        req.session.id_jugador = jugador._id;
-        resultado.creado = true;
-        resultado.codigo = 'bien';
-        resultado.simbolo = jugador.simbolo;
+      function (_player, _n, callback) {
+        req.session.id_player = player._id;
+        result.created = true;
+        result.code = 'ok';
+        result.symbol = player.symbol;
         callback(null);
       }
     ],
     //--------------------------------------------------------------------------
     function (err) {
-      if (err && err !== ABORTAR) {
+      if (err && err !== ABORT) {
         console.log(err);
       }
-      res.json(resultado);
+      res.json(result);
     });
   }
 });
 
-//------------------------------------------------------------------------------
-router.get('/gato/estado/', function (req, res) {
+/* GET state */
+router.get(GAME_ROOT + 'state/', function (req, res) {
 
-  var resultado = { estado: 'error'};
+  var result = { state: 'error'};
 
-  obtenerJuegoJugador(req, function (err, juego, jugador) {
-
+  getGamePlayer(req, function (err, game, player) {
     //--------------------------------------------------------------------------
-    function eliminarJuegoJugadores () {
+    function deleteGamePlayers () {
       async.waterfall([
         //----------------------------------------------------------------------
         function (callback) {
-          delete req.session.id_jugador;
-          jugador.remove(callback);
+          delete req.session.id_player;
+          player.remove(callback);
         },
         //----------------------------------------------------------------------
-        function (jugadorBorrado, callback) {
-          Jugador.find({ juego: juego._id }, callback);
+        function (deletedPlayer, callback) {
+          Player.find({ game: game._id }, callback);
         },
         //----------------------------------------------------------------------
-        function (jugadores, callback) {
-          if (jugadores.length === 0) {
-            juego.remove(callback);
+        function (players, callback) {
+          if (players.length === 0) {
+            game.remove(callback);
           } else {
             callback(null);
           }
@@ -140,26 +135,19 @@ router.get('/gato/estado/', function (req, res) {
         if (err) {
           console.log(err);
         }
-        res.json(resultado);
+        res.json(result);
       });
     };
-
+/* ******************************************* */
     //--------------------------------------------------------------------------
-    function ganado(s, t) {
-      return (s === t[0][0] && s === t[0][1] && s === t[0][2]) ||
-             (s === t[1][0] && s === t[1][1] && s === t[1][2]) ||
-             (s === t[2][0] && s === t[2][1] && s === t[2][2]) ||
-             (s === t[0][0] && s === t[1][0] && s === t[2][0]) ||
-             (s === t[0][1] && s === t[1][1] && s === t[2][1]) ||
-             (s === t[0][2] && s === t[1][2] && s === t[2][2]) ||
-             (s === t[0][0] && s === t[1][1] && s === t[2][2]) ||
-             (s === t[0][2] && s === t[1][1] && s === t[2][0]);
+    function gameResult(symbol, board) {
+      return 'tie';
     }
 
     //--------------------------------------------------------------------------
-    function lleno(t) {
-      for (var i = 0; i < 3; i++) {
-        for (var j = 0; j < 3; j++) {
+    function full(t) {
+      for (var i = 0; i < t.length; i++) {
+        for (var j = 0; j < t[j].length; j++) {
           if (t[i][j] === ' ') return false;
         }
       }
@@ -169,62 +157,54 @@ router.get('/gato/estado/', function (req, res) {
 
     if (err) {
       console.log(err);
-      res.json(resultado);
+      res.json(result);
     } else {
 
-      var tablero = juego.getTablero();
+      var board = game.getBoard();
 
-      resultado.tablero = tablero;
+      result.board = board;
 
-      if (!juego.iniciado) {
-        resultado.estado = 'espera';
-        res.json(resultado);
+      if (!game.started) {
+        result.state = 'wait';
+        res.json(result);
 
-      } else if (ganado(jugador.simbolo, tablero)) {
-        resultado.estado = 'ganaste';
-        eliminarJuegoJugadores();
-
-      } else if (ganado(contrincante(jugador.simbolo), tablero)) {
-        resultado.estado = 'perdiste';
-        eliminarJuegoJugadores();
-
-      } else if (lleno(tablero)) {
-        resultado.estado = 'empate';
-        eliminarJuegoJugadores();
-
-      } else if (juego.turno === jugador.simbolo) {
-        resultado.estado = 'tu_turno';
-        res.json(resultado);
+      } else if (full(board)) {
+        result.state = gameResult(player.symbol, board);
+        deleteGamePlayers();
+        
+      } else if (game.turn === player.symbol) {
+        result.state = 'your_turn';
+        res.json(result);
 
       } else {
-        resultado.estado = 'espera';
-        res.json(resultado);
+        result.state = 'wait';
+        res.json(result);
       }
     }
   });
 });
 
-//------------------------------------------------------------------------------
-router.get('/gato/juegos_existentes/', function (req, res) {
-  Juego
-    .find({ iniciado: false })
-    .sort('nombre')
-    .exec(function (err, juegos) {
+/* GET available_games */
+router.get(GAME_ROOT + 'available_games/', function (req, res) {
+  Game
+    .find({ started: false })
+    .sort('name')
+    .exec(function (err, games) {
       if (err) {
         console.log(err);
       }
-      res.json(juegos.map(function (x) {
-        return { id: x._id, nombre: x.nombre };
+      res.json(games.map(function (x) {
+        return { id: x._id, name: x.name, size: x.board.length };
       }));
     });
 });
 
-//------------------------------------------------------------------------------
-router.put('/gato/tirar/', function (req, res) {
+/* PUT play */
+router.put(GAME_ROOT + 'play/', function (req, res) {
 
-  var resultado = { efectuado: false };
+  var result = { done: false };
 
-  obtenerJuegoJugador(req, function (err, juego, jugador) {
+  getGamePlayer(req, function (err, game, player) {
 
     //--------------------------------------------------------------------------
     function convertirEntero(s) {

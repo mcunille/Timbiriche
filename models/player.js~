@@ -23,7 +23,7 @@
  
  //-------------------------------------------------------------------------------
  var playerSchema = mongoose.Schema({
- 		 player: ObjectId,
+ 		 game: ObjectId,
  		 symbol: String
  });
  
