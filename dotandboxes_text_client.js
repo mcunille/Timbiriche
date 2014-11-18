@@ -67,7 +67,7 @@ function webServiceCaller(host) {
 	
 	//------------------------------------------------------------------------------
 	return {
-		call: function (method, route, params, callback) {
+		invoke: function (method, route, params, callback) {
 			
 			var options = {
 				url: host + route,
@@ -95,6 +95,7 @@ function webServiceCaller(host) {
 }
 
 //------------------------------------------------------------------------------
+// Create a new game
 function createGame() {
 
   println();
@@ -115,7 +116,7 @@ function createGame() {
     		if (size === '') {
     			menu();
     		} else {
-    			servicioWeb.call(
+    			servicioWeb.invoke(
         		'POST',
         		GAME_ROOT + 'create_game/',
         		{'name': name, 'size': size},
@@ -143,45 +144,46 @@ function createGame() {
 }
 
 //------------------------------------------------------------------------------
-function errorFatal(mensaje) {
-  imprimirNl('ERROR FATAL: ' + mensaje);
+// Throw fatal error
+function fatalError(message) {
+  println('ERROR FATAL: ' + message);
   process.exit(1);
 }
 
 //------------------------------------------------------------------------------
-function esperarTurno(callback) {
-  servicioWeb.invocar(
+// Wait for the player's turn
+function waitTurn(callback) {
+  webService.invoke(
     'GET',
-    '/gato/estado/',
+    GAME_ROOT + 'state/',
     {},
-    function (resultado) {
-      if (resultado.estado === 'espera') {
+    function (result) {
+      if (result.state === 'wait') {
         setTimeout(
           function () {
-            esperarTurno(callback);
+            waitTurn(callback);
           },
-          PAUSA
+          PAUSE
         );
       } else {
-        imprimirNl();
-        callback(resultado);
+        println();
+        callback(result);
       }
     }
   );
 }
 
-
-
 //-------------------------------------------------------------------------------
-function imprimirMenu() {
-  imprimirNl();
-  imprimirNl('================');
-  imprimirNl(' MENÚ PRINCIPAL');
-  imprimirNl('================');
-  imprimirNl('(1) Crear un nuevo juego');
-  imprimirNl('(2) Unirse a un juego existente');
-  imprimirNl('(3) Salir');
-  imprimirNl();
+// Print the Menu
+function printMenu() {
+  println();
+  println('================');
+  println(' MENÚ PRINCIPAL');
+  println('================');
+  println('(1) Crear un nuevo juego');
+  println('(2) Unirse a un juego existente');
+  println('(3) Salir');
+  println();
 }
 
 //------------------------------------------------------------------------------
@@ -200,18 +202,38 @@ function println(message) {
 }
 
 //------------------------------------------------------------------------------
-function imprimirPosicionesTablero() {
-  imprimirTablero([[0, 1, 2], [3, 4, 5], [6, 7, 8]]);
-  imprimirNl();
-}
+// Print board
+//
+//   0   1   2   3   4   x 
+// 0 .   .   .   .   .
+//  
+// 1 .   .   .   .   .
+//  
+// 2 .   .   .   .   .
+//  
+// 3 .   .   .   .   .
+// 
+// 4 .   .   .   .   .
+//
+// y
+function printBoard(board) {
+	print('  ');
+	for(var i = 0; i < board.length; i++) {
+		print(i + '   ');
+	};
+	println();
 
-//------------------------------------------------------------------------------
-function imprimirTablero(t) {
-  imprimirNl(' ' + t[0].join(' | '));
-  imprimirNl('---|---|---');
-  imprimirNl(' ' + t[1].join(' | '));
-  imprimirNl('---|---|---');
-  imprimirNl(' ' + t[2].join(' | '));
+	for (var row = 0; row < board.length; row++) {
+		print(row + ' ');
+		for (var column = 0; column < board[row].length; column++) {
+			if (column % 2 === 0) {
+				print(board[row][column]);
+			} else {
+				print(' ' + board[row][column] + ' ');
+			}
+		}
+		println();
+	}
 }
 
 //------------------------------------------------------------------------------
