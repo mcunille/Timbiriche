@@ -100,7 +100,7 @@ function createGame() {
   println();
   print('Indica el nombre del juego: ');
 
-  stdin.once('data', function (data) {
+  stdin.once('data', function(data) {
     var name = data.toString().trim();
 
     if (name === '') {
@@ -108,30 +108,36 @@ function createGame() {
     } else {
     
     	print('Indica el tamaño del tablero (5 - 10): ');
-    
-      servicioWeb.call(
-        'POST',
-        GAME_ROOT + 'create_game/',
-        {'name': name},
-        function (result) {
+    	
+    	stdin.once('data', function(data) {
+    		var size = data.toString().trim();
+    		
+    		if (size === '') {
+    			menu();
+    		} else {
+    			servicioWeb.call(
+        		'POST',
+        		GAME_ROOT + 'create_game/',
+        		{'name': name, 'size': size},
+        		function (result) {
 
-          if (result.created) {
-            play(result.symbol);
-            return;
-
-          } else if (result.code === 'duplicate') {
-            println();
-            println('Error: Alguien más ya creó un juego con este ' +
-                      'nombre: ' + name);
-
-          } else {
-            println();
-            println('No se proporcionó un nombre de juego válido.');
-          }
-
-          menu();
-        }
-      );
+		          if (result.created) {
+		            play(result.symbol);
+		            return;
+		          } else if (result.code === 'duplicate') {
+    		        println();
+    		        println('Error: Alguien más ya creó un juego con este ' +
+    	                  'nombre: ' + name);
+		          } else {
+    		        println();
+    		        println('No se proporcionó un nombre de juego válido.');
+    		      }
+    		      
+		          menu();
+        		}
+      		);
+    		}
+    	});
     }
   });
 }
