@@ -1,5 +1,10 @@
 ﻿JUEGO DE TIMBIRICHE DISTRIBUIDO
-Autores: Mauricio Cunillé Blando y José Roberto Torres Mancilla
+Autores: 
+		Mauricio Cunillé Blando 			A01164759
+		José Roberto Torres Mancilla	A01164816
+
+Código fuente disponible en Github bajo la licencia GPL 3.
+<https://github.com/mcunille/Timbiriche.git>
 ================================================================================
 Esta aplicación implementa el tradicional juego de timbriche. La aplicación
 está desarrollada en Node y permite hasta 4 jugadores jugando simultaneamente
