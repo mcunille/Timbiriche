@@ -232,12 +232,8 @@ function printBoard(board) {
 				print(' ' + board[row][column] + ' ');
 			}
 		}
+		println();
 	}
-  println(' ' + t[0].join(' | '));
-  println('---|---|---');
-  println(' ' + t[1].join(' | '));
-  println('---|---|---');
-  println(' ' + t[2].join(' | '));
 }
 
 //------------------------------------------------------------------------------
@@ -352,27 +348,37 @@ function leerNumero(inicio, fin, callback) {
 }
 
 //------------------------------------------------------------------------------
-function licencia() {
-  console.log('Este programa es software libre: usted puede redistribuirlo y/o');
-  console.log('modificarlo bajo los términos de la Licencia Pública General GNU');
-  console.log('versión 3 o posterior.');
-  console.log('Este programa se distribuye sin garantía alguna.');
+// Print the license
+function license() {
+  console.log('Copyright (C) 2014 Mauricio Cunille, Jose Roberto Torres');
+  console.log('This program is free software; you can redistribute it and/or ');
+  console.log('modify it under the terms of the GNU General Public License as');
+  console.log('published by the Free Software Foundation; either version 3 of');
+  console.log('the License, or (at your option) any later version.');
+  
+  console.log();
+  console.log('This program is distributed in the hope that it will be useful,');
+  console.log('but WITHOUT ANY WARRANTY; without even the implied warranty of');
+  console.log('MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the');
+  console.log('GNU General Public License for more details.');
+  
+  console.log();
+  console.log('You should have received a copy of the GNU General Public');
+  console.log('License along with this program; if not, see');
+  console.log('<http://www.gnu.org/licenses>.');
 }
 
 //------------------------------------------------------------------------------
 function menu() {
-  imprimirMenu();
-  leerNumero(1, 3, function (opcion) {
-    switch (opcion) {
-
+  printMenu();
+  readNumber(1, 3, function (option) {
+    switch (option) {
     case 1:
-      crearJuego();
+      createGame();
       break;
-
     case 2:
-      unirJuego();
+      joinGame();
       break;
-
     case 3:
       process.exit(0);
     }});
