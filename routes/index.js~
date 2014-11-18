@@ -430,6 +430,7 @@ router.put(GAME_ROOT + 'join_game/', function (req, res) {
         				result.code = 'used_symbol';
         				result.gameId = gameId;
         				callback(ABORT);
+        				console.log('After ABORT');
         			}
         		}
         	

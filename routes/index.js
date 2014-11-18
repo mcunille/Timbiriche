@@ -422,14 +422,14 @@ router.put(GAME_ROOT + 'join_game/', function (req, res) {
       function (_game, callback) {
         game = _game;
         if (game.started) {
-          callback(ABORT);
+          return callback(ABORT);
         } else {
         	Player.find({ game: game._id }, function (err, players) {
         		for (var i = 0; i < players.length; i++) {
         			if (players[i].symbol === symbol) {
         				result.code = 'used_symbol';
         				result.gameId = gameId;
-        				callback(ABORT);
+        				return callback(ABORT);
         			}
         		}
         	
