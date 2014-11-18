@@ -256,16 +256,12 @@ function endGame(state) {
   }
 
   switch (state) {
-
   case 'tie':
     return message('Empate.');
-
   case 'win':
     return message('Ganaste. ¡Felicidades!');
-
   case 'lost':
     return message('Perdiste. ¡Lástima!');
-
   default:
     return false;
   }
@@ -372,9 +368,9 @@ function readNumber(begin, end, label, callback) {
 
     if (/^\d+$/.test(data)) {
       var num = parseInt(data);
-      if (begin <= num && num <= end) {
+      //if (begin <= num && num <= end) {
         validNumber = true;
-      }
+      //}
     }
     if (validNumber) {
       callback(num);
@@ -453,7 +449,6 @@ function title() {
 function joinGame() {
   //----------------------------------------------------------------------------
   function verifyJoin(result) {
-  	console.log(result);
   
     if (result.joined) {
       play(result.symbol);

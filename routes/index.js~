@@ -173,18 +173,23 @@ router.get(GAME_ROOT + 'state/', function (req, res) {
     	}
     	
     	for (var row = 1; row < board.length; row += 2) {
-    		for (var column = 1; column < board.length; column += 2) {
+    		for (var column = 1; column < board[row].length; column += 2) {
     			var current_symbol = board[row][column];
-
-    			for (var player = 0; player < players.length; player++) {
+					
+					var found = false;
+    			for (var player = 0; player < players.length && !found; player++) {
     				if (players[player].symbol === current_symbol) {
     					players[player].count++;
-    					break;
+    					found = true;
+    				} else if (players[player].symbol === null) {
+    					players[player].symbol = current_symbol;
+    					players[player].count++;
+    					found = true;
     				}
     			}
     		}
     	}
-    	
+    	console.log(players);
     	var winnerCount = 0;
     	
     	for (var i = 0; i < players.length; i++) {
@@ -192,6 +197,7 @@ router.get(GAME_ROOT + 'state/', function (req, res) {
     			winnerCount = players[i].count;
     		}
     	}
+    	console.log(winnerCount);
     	
     	var winners = [];
     	
@@ -200,17 +206,18 @@ router.get(GAME_ROOT + 'state/', function (req, res) {
     			winners[winners.length] = players[i].symbol;
     		}
     	}
+    	console.log(winners);
     	
     	if (winners.length !== 1) {
     		return 'tie';
     	} else {
     		for (var i = 0; i < winners.length; i++) {
     			if (winners[i] === symbol) {
-    				return 'winner';
+    				return 'win';
     			}
     		}
     		
-    		return 'looser';
+    		return 'lost';
     	}
     }
 
@@ -422,15 +429,14 @@ router.put(GAME_ROOT + 'join_game/', function (req, res) {
       function (_game, callback) {
         game = _game;
         if (game.started) {
-          callback(ABORT);
+          return callback(ABORT);
         } else {
         	Player.find({ game: game._id }, function (err, players) {
         		for (var i = 0; i < players.length; i++) {
         			if (players[i].symbol === symbol) {
         				result.code = 'used_symbol';
         				result.gameId = gameId;
-        				callback(ABORT);
-        				console.log('After ABORT');
+        				return callback(ABORT);
         			}
         		}
         	

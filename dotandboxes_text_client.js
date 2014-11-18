@@ -256,16 +256,12 @@ function endGame(state) {
   }
 
   switch (state) {
-
   case 'tie':
     return message('Empate.');
-
   case 'win':
     return message('Ganaste. ¡Felicidades!');
-
   case 'lost':
     return message('Perdiste. ¡Lástima!');
-
   default:
     return false;
   }

@@ -173,20 +173,24 @@ router.get(GAME_ROOT + 'state/', function (req, res) {
     	}
     	
     	for (var row = 1; row < board.length; row += 2) {
-    		for (var column = 1; column < board.length; column += 2) {
+    		for (var column = 1; column < board[row].length; column += 2) {
     			var current_symbol = board[row][column];
-
-    			for (var player = 0; player < players.length; player++) {
+					
+					var found = false;
+    			for (var player = 0; player < players.length && !found; player++) {
     				if (players[player].symbol === current_symbol) {
     					players[player].count++;
-    					break;
+    					found = true;
+    				} else if (players[player].symbol === null) {
+    					players[player].symbol = current_symbol;
+    					players[player].count++;
+    					found = true;
     				}
     			}
     		}
     	}
     	
     	var winnerCount = 0;
-    	
     	for (var i = 0; i < players.length; i++) {
     		if (players[i].count > winnerCount) {
     			winnerCount = players[i].count;
@@ -194,7 +198,6 @@ router.get(GAME_ROOT + 'state/', function (req, res) {
     	}
     	
     	var winners = [];
-    	
     	for (var i = 0; i < players.length; i++) {
     		if (players[i].count === winnerCount) {
     			winners[winners.length] = players[i].symbol;
@@ -206,11 +209,11 @@ router.get(GAME_ROOT + 'state/', function (req, res) {
     	} else {
     		for (var i = 0; i < winners.length; i++) {
     			if (winners[i] === symbol) {
-    				return 'winner';
+    				return 'win';
     			}
     		}
     		
-    		return 'looser';
+    		return 'lost';
     	}
     }
 
