@@ -90,7 +90,6 @@ console.log("Distributed Dots and Boxes Game, version " + game.version);
 console.log(game.author);
 console.log();
 
-console.log('Copyright (C) 2014 Mauricio Cunille, Jose Roberto Torres');
 console.log('This program is free software; you can redistribute it and/or ');
 console.log('modify it under the terms of the GNU General Public License as');
 console.log('published by the Free Software Foundation; either version 3 of');
