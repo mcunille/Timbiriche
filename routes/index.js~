@@ -60,8 +60,8 @@ router.post(GAME_ROOT + 'create_game/', function (req, res) {
   var name = req.body.name;
   var size = req.body.size;
   var players = req.body.players;
-  
   var player_symbol = req.body.symbol;
+  
   var game;
   var player;
 
@@ -74,7 +74,7 @@ router.post(GAME_ROOT + 'create_game/', function (req, res) {
  	 		boardArray[i] = [];
  	 	 
  	 	 	for(var j = 0; j < boardLength; j++) {
- 	 	 		(i + j) % 2 === 0 ? boardArray[i][j] = '.' : boardArray[i][j] = ' ';	 
+ 	 	 		boardArray[i][j] = i % 2 === 0 && j % 2 === 0 ? '.' : ' ';	 
  	 	 	}
  	 	}
  	 
@@ -104,7 +104,6 @@ router.post(GAME_ROOT + 'create_game/', function (req, res) {
       },
       //------------------------------------------------------------------------
       function (_game, _n, callback) {
-      	console.log('Waterfall 03');
         player = new Player({ 
         		game: game._id,
             symbol: player_symbol});
@@ -112,7 +111,6 @@ router.post(GAME_ROOT + 'create_game/', function (req, res) {
       },
       //------------------------------------------------------------------------
       function (_player, _n, callback) {
-      	console.log('Waterfall 04');
         req.session.id_player = player._id;
         result.created = true;
         result.code = 'ok';
@@ -122,7 +120,6 @@ router.post(GAME_ROOT + 'create_game/', function (req, res) {
     ],
     //--------------------------------------------------------------------------
     function (err) {
-    	console.log('Waterfall 05');
       if (err && err !== ABORT) {
         console.log(err);
       }
@@ -222,7 +219,7 @@ router.get(GAME_ROOT + 'state/', function (req, res) {
  			// Checks for player symbols in each box. 
  			// If blank then the board isn't full.
       for (var row = 1; row < t.length; row += 2) {
-        for (var column = 1; column < t[j].length; column += 2) {
+        for (var column = 1; column < t[row].length; column += 2) {
           if (t[row][column] === ' ') return false;
         }
       }
@@ -239,7 +236,7 @@ router.get(GAME_ROOT + 'state/', function (req, res) {
       var board = game.getBoard();
 
       result.board = board;
-
+			
       if (!game.started) {
         result.state = 'wait';
         res.json(result);
@@ -280,7 +277,7 @@ router.get(GAME_ROOT + 'available_games/', function (req, res) {
 // PUT play
 router.put(GAME_ROOT + 'play/', function (req, res) {
 
-  var result = { done: false };
+  var result = { done: false, code: null };
 
   getGamePlayer(req, function (err, game, player) {
     //--------------------------------------------------------------------------
@@ -292,7 +289,7 @@ router.put(GAME_ROOT + 'play/', function (req, res) {
     //--------------------------------------------------------------------------
     function saveChanges(board, row, col) {
     
-      board[row][col] = row % 2 === 0 ? '|' : '-';
+      board[row][col] = col % 2 === 0 ? '|' : '_';
       var completedSquare = false;
       
       if (row % 2 === 0) {
@@ -333,26 +330,30 @@ router.put(GAME_ROOT + 'play/', function (req, res) {
       	}
       }
       
-      var nextTurn = completedSquare ? player.symbol : challenger(game, game.turn);
+      challenger(game, game.turn, function(challengersymbol) {
+      	var nextTurn = completedSquare ? player.symbol : challengersymbol;
       
-      if (nextTurn === -1 ) {
-      	result.done = false;
-      	result.board = board;
-      	res.json(result);
-      } else {
-      	game.turn = nextTurn;
-	      game.setBoard(board);
+      	if (nextTurn === -1 ) {
+      		result.done = false;
+      		result.code = 'invalid_turn';
+      		result.board = board;
+      		res.json(result);
+	      } else {
+  	    	game.turn = nextTurn;
+		      game.setBoard(board);
 	      
-      	game.save(function (err) {
-        	if (err) {
-        	  console.log(err);
-        	}
+  	    	game.save(function (err) {
+  	      	if (err) {
+  	      	  console.log(err);
+  	      	}
         	
-        	result.done = true;
-        	result.board = board;
-        	res.json(result);
+  	      	result.done = true;
+  	      	result.code = 'ok';
+  	      	result.board = board;
+  	      	res.json(result);
+  	    	});
+  	    }
       });
-      }
     }
 
 		//--------------------------------------------------------------------------
@@ -364,9 +365,10 @@ router.put(GAME_ROOT + 'play/', function (req, res) {
     }
 
     //--------------------------------------------------------------------------
-    function validatePlay(board, row, col) {
-      return (sqrt(pow(x1-x2, 2) + pow(y1-y2, 2)) === 1) &&
-             board[row][col] === ' ';
+    function validatePlay(board, x1, x2, y1, y2, row, col) {
+    	var distance 	= Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
+    	var result 		= distance === 1 && board[row][col] === ' ';
+      return result;
     }
     
     //--------------------------------------------------------------------------
@@ -380,13 +382,13 @@ router.put(GAME_ROOT + 'play/', function (req, res) {
 			var y1 = convertInt(req.body.y1);
 			var y2 = convertInt(req.body.y2);
 			
-      var row = x1 + x2;
-      var col = y1 + y2;
+      var row = y1 + y2;
+      var col = x1 + x2;
 
-      if (game.turn === player.simbolo) {
+      if (game.turn === player.symbol) {
         var board = game.getBoard();
 
-        if (validatePlay(board, row, col)) {
+        if (validatePlay(board, x1, x2, y1, y2, row, col)) {
           saveChanges(board, row, col);
         } else {
           res.json(result);
@@ -404,7 +406,7 @@ router.put(GAME_ROOT + 'join_game/', function (req, res) {
 
   var result = { joined: false, code: 'bad_id' };
   
-  var gameId = req.body.game_id;
+  var gameId = req.body.id_game;
   var symbol = req.body.symbol;
   
   var game;
@@ -423,16 +425,17 @@ router.put(GAME_ROOT + 'join_game/', function (req, res) {
           callback(ABORT);
         } else {
         	Player.find({ game: game._id }, function (err, players) {
-        		if (players.length === game.players - 1) {
-        			for (var i = 0; i < players.length; i++) {
-        				if (players[i].symbol === symbol) {
-        					result.code = 'used_symbol';
-        					callback(ABORT);
-        				}
+        		for (var i = 0; i < players.length; i++) {
+        			if (players[i].symbol === symbol) {
+        				result.code = 'used_symbol';
+        				result.gameId = gameId;
+        				callback(ABORT);
         			}
-        			
+        		}
+        	
+        		if (players.length === game.players - 1) {
         			game.started = true;
-	          	game.save(callback);
+	        	  game.save(callback);
         		}
         	});
         }
@@ -443,7 +446,7 @@ router.put(GAME_ROOT + 'join_game/', function (req, res) {
           { game: game._id,
             symbol: symbol
           });
-        jugador.save(callback);
+        player.save(callback);
       },
       //------------------------------------------------------------------------
       function (_player, _n, callback) {
@@ -459,6 +462,7 @@ router.put(GAME_ROOT + 'join_game/', function (req, res) {
       if (err && err !== ABORT) {
         console.log(err);
       }
+      
       res.json(result);
     });
   } else {
@@ -467,21 +471,22 @@ router.put(GAME_ROOT + 'join_game/', function (req, res) {
 });
 
 //------------------------------------------------------------------------------
-function challenger(game, symbol) {
+function challenger(game, symbol, callback) {
 	Player.find({ game: game._id }).sort({symbol: 1}).exec(function(err, players) {
 		for (var i = 0; i < players.length; i++) {
 			if (players[i].symbol === symbol) {
-				return players[++i % players.length].symbol;
+				callback(players[++i % players.length].symbol);
+				return;
 			}
 		}
+		
+		callback(-1);
+		return;
 	});
-
-  return -1;
 }
 
 //------------------------------------------------------------------------------
 function getGamePlayer(req, callback) {
-
   var playerId = req.session.id_player;
   var game;
   var player;

@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+
 /*
  Dots and Boxes Game
  Text Client.
@@ -40,12 +41,12 @@ function webServiceCaller(host) {
 	
 	//------------------------------------------------------------------------------
 	function getCookies(res) {
-		var setCookiesValue = res.headers['set-cookies'];
+		var setCookiesValue = res.headers['set-cookie'];
 		
 		if(setCookiesValue) {
 			var cookies = [];
-			setCookiesValue.foreach(function () {
-					cookies.push(/[^=]+=[^;]+/.exec(str)[1]);
+			setCookiesValue.forEach(function(str) {
+					cookies.push(/([^=]+=[^;]+);/.exec(str)[1]);
 			});
 			cookiesSession = cookies.join('; ');
 		}
@@ -54,11 +55,9 @@ function webServiceCaller(host) {
 	//------------------------------------------------------------------------------
 	function headers(method) {
 		var r = {};
-		
 		if(method !== 'GET') {
 			r['Content-type'] = 'application/x-www-form-urlencoded';
 		}
-		
 		if(cookiesSession) {
 			r['Cookie'] = cookiesSession;
 		}
@@ -82,7 +81,6 @@ function webServiceCaller(host) {
 			}
 			
 			request(options, function(error, res, body) {
-				
 					if(res.statusCode !== 200) {
 						fatalError('Not OK status code (' + res.statusCode + ')');
 					}
@@ -101,6 +99,7 @@ function createGame() {
 	var name;
 	var size;
 	var players;
+	var symbol;
 
   println();
   print('Indica el nombre del juego: ');
@@ -114,25 +113,30 @@ function createGame() {
     		readNumber(2, 4, 'Indica el número de jugadores', function(data) {
     			players = data
     			
-    			webService.invoke(
-        		'POST',
-        		GAME_ROOT + 'create_game/',
-        		{'name': name, 'size': size, 'players': players},
-        		function (result) {
-		          if (result.created) {
-		            play(result.symbol);
-		            return;
-		          } else if (result.code === 'duplicate') {
-    		        println();
-    		        println('Error: Alguien más ya creó un juego con este ' +
-    	                  'nombre: ' + name);
-		          } else {
-    		        println();
-    		        println('No se proporcionó un nombre de juego válido.');
-    		      }
-		          menu();
-        		}
-      		);
+    			print('Indica el símbolo de tu jugador: ');
+    			stdin.once('data', function(data) {
+    				symbol = data.toString().trim();
+    			
+    				webService.invoke(
+        			'POST',
+        			GAME_ROOT + 'create_game/',
+        			{'name': name, 'size': size, 'players': players, 'symbol': symbol},
+        			function (result) {
+		          	if (result.created) {
+		          	  play(result.symbol);
+		          	  return;
+		          	} else if (result.code === 'duplicate') {
+    		      	  println();
+    		      	  println('Error: Alguien más ya creó un juego con este ' +
+    	        	          'nombre: ' + name);
+		          	} else {
+    		      	  println();
+    		      	  println('No se proporcionó un nombre de juego válido.');
+    		      	}
+		          	menu();
+        			}
+      			);
+      		});
     		});
     	});
     }
@@ -161,6 +165,8 @@ function waitTurn(callback) {
           },
           PAUSE
         );
+      } else if (result.state === 'error') {
+      	fatalError('El servidor respondió con un código de error.');
       } else {
         println();
         callback(result);
@@ -214,13 +220,19 @@ function println(message) {
 // y
 function printBoard(board) {
 	print('  ');
-	for(var i = 0; i < board.length; i++) {
+	for(var i = 0; i < board.length / 2; i++) {
 		print(i + '   ');
 	};
+	print('x');
 	println();
 
 	for (var row = 0; row < board.length; row++) {
-		print(row + ' ');
+		if (row % 2 === 0) {
+			print((row / 2) + ' ');
+		} else {
+			print('  ');
+		}
+		
 		for (var column = 0; column < board[row].length; column++) {
 			if (column % 2 === 0) {
 				print(board[row][column]);
@@ -230,14 +242,16 @@ function printBoard(board) {
 		}
 		println();
 	}
+	println();
+	println('y');
 }
 
 //------------------------------------------------------------------------------
 function endGame(state) {
 
   function message(s) {
-    printNl();
-    printNl(s);
+    println();
+    println(s);
     return true;
   }
 
@@ -261,9 +275,9 @@ function endGame(state) {
 function play(symbol) {
 
   println();
-  println('Un momento');
+  println('Un momento, esperando al otro jugador...');
+  
   waitTurn(function (result) {
-
     //--------------------------------------------------------------------------
     function moveDone(board) {
       println();
@@ -283,13 +297,17 @@ function play(symbol) {
     }
 
     //--------------------------------------------------------------------------
-    function moveNotDone() {
-      println();
-      println('ERROR: Tiro inválido.');
-      play(symbol);
+    function moveNotDone(code) {
+    	if (code === 'invalid_turn') {
+    		fatalError('El servidor ha experimentado un problema.');
+    	} else {
+      	println();
+      	println('ERROR: Tiro inválido.');
+      	play(symbol);
+      }
     }
+    
     //--------------------------------------------------------------------------
-
     printBoard(result.board);
 
     if (endGame(result.state)) {
@@ -305,32 +323,37 @@ function play(symbol) {
       var y1;
       var y2;
       
-      var boardLength = result.board.length / 2;
+      var boardLength = (result.board.length - 1) / 2;
       
-      readNumber(0, boardLength, 'Introduce tu coordenada x1', function(nX1){
-          x1 = nX1;
-          readNumber(0, boardLength, 'Introduce tu coordenada x2', function(nX2){
-              x2 = nX2;
-              readNumber(0, boardLength, 'Introduce tu coordenada y1', function(nY1){
-                  y1 = nY1;
-                  readNumber(0, boardLength, 'Introduce tu coordenada y2', function(nY2){
-                      y2 = nY2;
-                      webService.invoke(
-                          'PUT',
-                          GAME_ROOT + 'play/',
-                          { x1: x1, x2: x2, y1: y1, y2: y2},
-                          function(result){
-                              if(result.done){
-                                  moveDone(result.board);
-                              }
-                              else{
-                                  moveNotDone();
-                              }
-                          }
-                      );
-                  });
-              });
-          });
+      readNumber(0, boardLength, 
+      	'Introduce tu coordenada x1', function(data){
+      	x1 = data;
+       	readNumber(0, boardLength, 
+       		'Introduce tu coordenada y1', function(data){
+        	y1 = data;
+          readNumber(0, boardLength, 
+          	'Introduce tu coordenada x2', function(data){
+          	x2 = data;
+            readNumber(0, boardLength, 
+            	'Introduce tu coordenada y2', function(data){
+            	y2 = data;
+              webService.invoke(
+              	'PUT',
+              	GAME_ROOT + 'play/',
+                { 'x1': x1, 'x2': x2, 'y1': y1, 'y2': y2},
+                function(result){
+                
+                	if(result.done){
+                  	moveDone(result.board);
+                  }
+                  else{
+                  	moveNotDone(result.code);
+                  }
+               	}
+             	);
+        		});
+         	});
+      	});
       });
     }
   });
@@ -414,6 +437,7 @@ function selectAvailableGames(games, callback) {
     println('    (' + i + ') «' + games[i - 1].name + '»');
   }
   println('    (' + total + ') Regresar al menú principal');
+  println();
   readNumber(1, total, 'Introduce la opción deseada ', function (option) {
     callback(option === total ? -1 : option - 1);
   });
@@ -427,22 +451,41 @@ function title() {
 
 //------------------------------------------------------------------------------
 function joinGame() {
-
   //----------------------------------------------------------------------------
   function verifyJoin(result) {
-    if (result.join) {
+  
+    if (result.joined) {
       play(result.symbol);
+    } else if (result.code === 'used_symbol'){
+    	println();
+    	println('El śimbolo de jugador escogido ya está en uso.');
+    	setSymbol(result.gameId);
     } else {
       println();
       println('No es posible unirse a ese juego.');
       menu();
     }
   }
+  
   //----------------------------------------------------------------------------
-
+  function setSymbol(gameId) {
+  	print('Indica el símbolo de tu jugador: ');
+   		stdin.once('data', function(data) {
+    		var symbol = data.toString().trim();
+          
+      	webService.invoke(
+      		'PUT',
+      		GAME_ROOT + 'join_game/',
+      	  { 'id_game': gameId, 'symbol': symbol },
+      	  verifyJoin
+     		);
+      });
+  }
+  
+  //----------------------------------------------------------------------------  
   webService.invoke(
     'GET',
-    GAME_ROOT + 'available_game/',
+    GAME_ROOT + 'available_games/',
     {},
     function (games) {
       if (games.length === 0) {
@@ -454,12 +497,7 @@ function joinGame() {
           if (option === -1) {
             menu();
           } else {
-            webService.invoke(
-              'PUT',
-              GAME_ROOT + 'join_game/',
-              { id_game: game[option].id },
-              varifyJoin
-            );
+          	setSymbol(games[option].id);
           }
         });
       }
