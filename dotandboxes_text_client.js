@@ -366,6 +366,10 @@ function license() {
   console.log('You should have received a copy of the GNU General Public');
   console.log('License along with this program; if not, see');
   console.log('<http://www.gnu.org/licenses>.');
+  
+  console.log();
+  console.log('You can download the source code from');
+  console.log('<https://github.com/mcunille/Timbiriche.git>.');
 }
 
 //------------------------------------------------------------------------------

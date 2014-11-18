@@ -369,6 +369,7 @@ function license() {
 }
 
 //------------------------------------------------------------------------------
+// Menu functionality
 function menu() {
   printMenu();
   readNumber(1, 3, function (option) {
