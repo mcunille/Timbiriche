@@ -65,6 +65,23 @@ router.post(GAME_ROOT + 'create_game/', function (req, res) {
   var game;
   var player;
 
+	//----------------------------------------------------------------------------
+ 	function createBoardString(size) {
+ 		var boardArray = [];
+ 	 	var boardLength = (2 * size) - 1;
+ 	 
+ 	 	for(var i = 0; i < boardLength; i++) {
+ 	 		boardArray[i] = [];
+ 	 	 
+ 	 	 	for(var j = 0; j < boardLength; j++) {
+ 	 	 		(i + j) % 2 === 0 ? boardArray[i][j] = '.' : boardArray[i][j] = ' ';	 
+ 	 	 	}
+ 	 	}
+ 	 
+ 	 	return JSON.stringify(boardArray);
+ 	}
+
+	//----------------------------------------------------------------------------
   if (name) {
     async.waterfall([
       //------------------------------------------------------------------------
@@ -77,7 +94,7 @@ router.post(GAME_ROOT + 'create_game/', function (req, res) {
           game = new Game({
           	name: name, 
           	turn: player_symbol, 
-          	board: Game.createBoardString(size),
+          	board: createBoardString(size),
           	players: players});
           game.save(callback);
         } else {

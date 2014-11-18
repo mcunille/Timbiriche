@@ -71,14 +71,14 @@ function webServiceCaller(host) {
 			
 			var options = {
 				url: host + route,
-				mathod: method,
+				method: method,
 				headers: headers(method)
 			};
 			
 			if(method === 'GET') {
 				options.url += '?' + querystring.stringify(params);
 			} else {
-				options.body = queystring.stringify(params);
+				options.body = querystring.stringify(params);
 			}
 			
 			request(options, function(error, res, body) {
@@ -98,30 +98,27 @@ function webServiceCaller(host) {
 // Create a new game
 function createGame() {
 
+	var name;
+	var size;
+	var players;
+
   println();
   print('Indica el nombre del juego: ');
-
   stdin.once('data', function(data) {
-    var name = data.toString().trim();
-
+    name = data.toString().trim();
     if (name === '') {
       menu();
     } else {
-    
-    	print('Indica el tamaño del tablero (5 - 10): ');
-    	
-    	stdin.once('data', function(data) {
-    		var size = data.toString().trim();
-    		
-    		if (size === '') {
-    			menu();
-    		} else {
-    			servicioWeb.invoke(
+    	readNumber(5, 10, 'Indica el tamaño del tablero', function(data) {
+    		size = data;
+    		readNumber(2, 4, 'Indica el número de jugadores', function(data) {
+    			players = data
+    			
+    			webService.invoke(
         		'POST',
         		GAME_ROOT + 'create_game/',
-        		{'name': name, 'size': size},
+        		{'name': name, 'size': size, 'players': players},
         		function (result) {
-
 		          if (result.created) {
 		            play(result.symbol);
 		            return;
@@ -133,14 +130,13 @@ function createGame() {
     		        println();
     		        println('No se proporcionó un nombre de juego válido.');
     		      }
-    		      
 		          menu();
         		}
       		);
-    		}
+    		});
     	});
     }
-  });
+ 	});
 }
 
 //------------------------------------------------------------------------------
@@ -311,13 +307,13 @@ function play(symbol) {
       
       var boardLength = result.board.length / 2;
       
-      readNumber(0, boardLength, 'x1', function(nX1){
+      readNumber(0, boardLength, 'Introduce tu coordenada x1', function(nX1){
           x1 = nX1;
-          readNUmber(0, boardLength, 'x2' function(nX2){
+          readNumber(0, boardLength, 'Introduce tu coordenada x2', function(nX2){
               x2 = nX2;
-              readNumber(0, boardLength, 'y1' function(nY1){
+              readNumber(0, boardLength, 'Introduce tu coordenada y1', function(nY1){
                   y1 = nY1;
-                  readNumber(0, boardLength, 'y2', function(nY2){
+                  readNumber(0, boardLength, 'Introduce tu coordenada y2', function(nY2){
                       y2 = nY2;
                       webService.invoke(
                           'PUT',
@@ -343,7 +339,7 @@ function play(symbol) {
 //------------------------------------------------------------------------------
 function readNumber(begin, end, label, callback) {
 
-  imprimir('Introduce tu coordenada ' + label + ' del ' + begin + ' al ' + end + ': ');
+  print(label + ' del ' + begin + ' al ' + end + ': ');
 
   stdin.once('data', function (data) {
 
@@ -357,7 +353,7 @@ function readNumber(begin, end, label, callback) {
         validNumber = true;
       }
     }
-    if (validNUmber) {
+    if (validNumber) {
       callback(num);
     } else {
       readNumber(begin, end, label ,callback);
@@ -394,7 +390,7 @@ function license() {
 // Menu functionality
 function menu() {
   printMenu();
-  readNumber(1, 3, function (option) {
+  readNumber(1, 3, 'Introduce la opción deseada ', function (option) {
     switch (option) {
     case 1:
       createGame();
@@ -412,21 +408,21 @@ function selectAvailableGames(games, callback) {
 
   var total = games.length + 1;
 
-  printnl();
-  printnl('¿A qué juego deseas unirte?');
+  println();
+  println('¿A qué juego deseas unirte?');
   for (var i = 1; i < total; i++) {
-    printnl('    (' + i + ') «' + games[i - 1].name + '»');
+    println('    (' + i + ') «' + games[i - 1].name + '»');
   }
-  printnl('    (' + total + ') Regresar al menú principal');
-  readNumber(1, total, function (option) {
+  println('    (' + total + ') Regresar al menú principal');
+  readNumber(1, total, 'Introduce la opción deseada ', function (option) {
     callback(option === total ? -1 : option - 1);
   });
 }
 
 //------------------------------------------------------------------------------
 function title() {
-  printnl('JUego de Timbiriche distribuido');
-  printnl('© 2014 por Mauricio Cunillé Blando y José Roberto Torres, ITESM CEM.');
+  println('JUego de Timbiriche distribuido');
+  println('© 2014 por Mauricio Cunillé Blando y José Roberto Torres, ITESM CEM.');
 }
 
 //------------------------------------------------------------------------------
@@ -437,8 +433,8 @@ function joinGame() {
     if (result.join) {
       play(result.symbol);
     } else {
-      printnl();
-      printnl('No es posible unirse a ese juego.');
+      println();
+      println('No es posible unirse a ese juego.');
       menu();
     }
   }
@@ -450,8 +446,8 @@ function joinGame() {
     {},
     function (games) {
       if (games.length === 0) {
-        printnl();
-        printnl('No hay juegos disponibles.');
+        println();
+        println('No hay juegos disponibles.');
         menu();
       } else {
         selectAvailableGames(games, function (option) {
@@ -474,8 +470,8 @@ function joinGame() {
 //------------------------------------------------------------------------------
 
 title();
-printnl();
-licese();
+println();
+license();
 
 if (process.argv.length !== 3) {
   println();

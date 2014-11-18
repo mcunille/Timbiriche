@@ -86,7 +86,7 @@ app.use(function(err, req, res, next) {
 module.exports = app;
 
 // Application startup
-console.log("Distributed Dots and Boxes Game, version " + game.version);
+console.log(game.title + ", version " + game.version);
 console.log(game.author);
 console.log();
 

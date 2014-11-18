@@ -42,19 +42,3 @@
  
  //-------------------------------------------------------------------------------
  module.exports = mongoose.model('Game', gameSchema);
- 
- //-------------------------------------------------------------------------------
- function createBoardString(size) {
- 	 var boardArray = [];
- 	 var boardLength = (2 * size) - 1;
- 	 
- 	 for(var i = 0; i < boardLength; i++) {
- 	 	 boardArray[i] = [];
- 	 	 
- 	 	 for(var j = 0; j < boardLength; j++) {
- 	 	 	 (i + j) % 2 === 0 ? boardArray[i][j] = '.' : boardArray[i][j] = ' ';	 
- 	 	 }
- 	 }
- 	 
- 	 return JSON.stringify(boardArray);
- }

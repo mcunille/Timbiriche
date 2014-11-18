@@ -1,7 +1,7 @@
 {
   "name": "Timbiriche",
   "version": "1.0.10",
-  "description:": "Distributed Dots and Boxes Game",
+  "title:": "Distributed Dots and Boxes Game",
   "author": "© 2014 Mauricio Cunillé and Roberto Torres, ITESM CEM",
   "license": "GPL-3.0+",
   "private": true,
