@@ -30,7 +30,8 @@ var request				 = require('request');
 var stdin					 = process.stdin;
 var stdout				 = process.stdout;
 
-var PAUSE					 = 1000;					// Miliseconds between each waiting request.
+// Miliseconds between each waiting
+var PAUSE					 = 1000;  request.
 var GAME_ROOT			 = '/dotsandboxes/';
 
 //------------------------------------------------------------------------------
