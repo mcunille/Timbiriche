@@ -116,11 +116,7 @@ function createGame() {
     		if (size === '') {
     			menu();
     		} else {
-<<<<<<< HEAD
-    			servicioWeb.call(
-=======
     			servicioWeb.invoke(
->>>>>>> 71a9bae30f41b30a3e6fc6511f00febc43059e3c
         		'POST',
         		GAME_ROOT + 'create_game/',
         		{'name': name, 'size': size},
@@ -241,24 +237,24 @@ function printBoard(board) {
 }
 
 //------------------------------------------------------------------------------
-function juegoTerminado(estado) {
+function endGame(state) {
 
-  function mens(s) {
-    imprimirNl();
-    imprimirNl(s);
+  function message(s) {
+    printNl();
+    printNl(s);
     return true;
   }
 
-  switch (estado) {
+  switch (state) {
 
-  case 'empate':
-    return mens('Empate.');
+  case 'tie':
+    return message('Empate.');
 
-  case 'ganaste':
-    return mens('Ganaste. ¡Felicidades!');
+  case 'win':
+    return message('Ganaste. ¡Felicidades!');
 
-  case 'perdiste':
-    return mens('Perdiste. ¡Lástima!');
+  case 'lost':
+    return message('Perdiste. ¡Lástima!');
 
   default:
     return false;
@@ -266,87 +262,105 @@ function juegoTerminado(estado) {
 }
 
 //------------------------------------------------------------------------------
-function jugar(symbol) {
+function play(symbol) {
 
-  imprimirNl();
-  imprimirNl('Un momento');
-  esperarTurno(function (resultado) {
+  println();
+  println('Un momento');
+  waitTurn(function (result) {
 
     //--------------------------------------------------------------------------
-    function tiroEfectuado(tablero) {
-      imprimirNl();
-      imprimirTablero(tablero);
-      servicioWeb.invocar(
+    function moveDone(board) {
+      println();
+      printBoard(board);
+      webService.invoke(
         'GET',
-        '/gato/estado/',
+        GAME_ROOT + 'state/',
         {},
-        function (resultado) {
-          if (juegoTerminado(resultado.estado)) {
+        function (result) {
+          if (endGame(result.state)) {
             menu();
           } else {
-            jugar(symbol);
+            play(symbol);
           }
         }
       );
     }
 
     //--------------------------------------------------------------------------
-    function tiroNoEfectuado() {
-      imprimirNl();
-      imprimirNl('ERROR: Tiro inválido.');
-      jugar(symbol);
+    function moveNotDone() {
+      println();
+      println('ERROR: Tiro inválido.');
+      play(symbol);
     }
     //--------------------------------------------------------------------------
 
-    imprimirTablero(resultado.tablero);
+    printBoard(result.board);
 
-    if (juegoTerminado(resultado.estado)) {
+    if (endGame(result.state)) {
       menu();
 
-    } else if (resultado.estado === 'tu_turno') {
-      imprimirNl();
-      imprimirNl('Tú tiras con: ' + symbol);
-      imprimirNl();
-      imprimirPosicionesTablero();
-      leerNumero(0, 8, function (opcion) {
-        servicioWeb.invocar(
-          'PUT',
-          '/gato/tirar/',
-          { ren: Math.floor(opcion / 3), col: opcion % 3 },
-          function (resultado) {
-            if (resultado.efectuado) {
-              tiroEfectuado(resultado.tablero);
-            } else {
-              tiroNoEfectuado();
-            }
-          }
-        );
+    } else if (result.state === 'your_turn') {
+      println();
+      println('Tú tiras con: ' + symbol);
+      println();
+      
+      var x1;
+      var x2;
+      var y1;
+      var y2;
+      
+      var boardLength = result.board.length / 2;
+      
+      readNumber(0, boardLength, 'x1', function(nX1){
+          x1 = nX1;
+          readNUmber(0, boardLength, 'x2' function(nX2){
+              x2 = nX2;
+              readNumber(0, boardLength, 'y1' function(nY1){
+                  y1 = nY1;
+                  readNumber(0, boardLength, 'y2', function(nY2){
+                      y2 = nY2;
+                      webService.invoke(
+                          'PUT',
+                          GAME_ROOT + 'play/',
+                          { x1: x1, x2: x2, y1: y1, y2: y2},
+                          function(result){
+                              if(result.done){
+                                  moveDone(result.board);
+                              }
+                              else{
+                                  moveNotDone();
+                              }
+                          }
+                      );
+                  });
+              });
+          });
       });
     }
   });
 }
 
 //------------------------------------------------------------------------------
-function leerNumero(inicio, fin, callback) {
+function readNumber(begin, end, label, callback) {
 
-  imprimir('Selecciona una opción del ' + inicio + ' al ' + fin + ': ');
+  imprimir('Introduce tu coordenada ' + label + ' del ' + begin + ' al ' + end + ': ');
 
   stdin.once('data', function (data) {
 
-    var numeroValido = false;
+    var validNumber = false;
 
     data = data.toString().trim();
 
     if (/^\d+$/.test(data)) {
       var num = parseInt(data);
-      if (inicio <= num && num <= fin) {
-        numeroValido = true;
+      if (begin <= num && num <= end) {
+        validNumber = true;
       }
     }
-    if (numeroValido) {
+    if (validNUmber) {
       callback(num);
     } else {
-      leerNumero(inicio, fin, callback);
+      readNumber(begin, end, label ,callback);
     }
   });
 }
@@ -370,6 +384,10 @@ function license() {
   console.log('You should have received a copy of the GNU General Public');
   console.log('License along with this program; if not, see');
   console.log('<http://www.gnu.org/licenses>.');
+  
+  console.log();
+  console.log('You can download the source code from');
+  console.log('<https://github.com/mcunille/Timbiriche.git>.');
 }
 
 //------------------------------------------------------------------------------
@@ -390,61 +408,61 @@ function menu() {
 }
 
 //------------------------------------------------------------------------------
-function seleccionarJuegosDisponibles(juegos, callback) {
+function selectAvailableGames(games, callback) {
 
-  var total = juegos.length + 1;
+  var total = games.length + 1;
 
-  imprimirNl();
-  imprimirNl('¿A qué juego deseas unirte?');
+  printnl();
+  printnl('¿A qué juego deseas unirte?');
   for (var i = 1; i < total; i++) {
-    imprimirNl('    (' + i + ') «' + juegos[i - 1].nombre + '»');
+    printnl('    (' + i + ') «' + games[i - 1].name + '»');
   }
-  imprimirNl('    (' + total + ') Regresar al menú principal');
-  leerNumero(1, total, function (opcion) {
-    callback(opcion === total ? -1 : opcion - 1);
+  printnl('    (' + total + ') Regresar al menú principal');
+  readNumber(1, total, function (option) {
+    callback(option === total ? -1 : option - 1);
   });
 }
 
 //------------------------------------------------------------------------------
-function titulo() {
-  imprimirNl('Juego de Gato distribuido');
-  imprimirNl('© 2013-2014 por Ariel Ortiz, ITESM CEM.');
+function title() {
+  printnl('JUego de Timbiriche distribuido');
+  printnl('© 2014 por Mauricio Cunillé Blando y José Roberto Torres, ITESM CEM.');
 }
 
 //------------------------------------------------------------------------------
-function unirJuego() {
+function joinGame() {
 
   //----------------------------------------------------------------------------
-  function verificarUnion(resultado) {
-    if (resultado.unido) {
-      jugar(resultado.simbolo);
+  function verifyJoin(result) {
+    if (result.join) {
+      play(result.symbol);
     } else {
-      imprimirNl();
-      imprimirNl('No es posible unirse a ese juego.');
+      printnl();
+      printnl('No es posible unirse a ese juego.');
       menu();
     }
   }
   //----------------------------------------------------------------------------
 
-  servicioWeb.invocar(
+  webService.invoke(
     'GET',
-    '/gato/juegos_existentes/',
+    GAME_ROOT + 'available_game/',
     {},
-    function (juegos) {
-      if (juegos.length === 0) {
-        imprimirNl();
-        imprimirNl('No hay juegos disponibles.');
+    function (games) {
+      if (games.length === 0) {
+        printnl();
+        printnl('No hay juegos disponibles.');
         menu();
       } else {
-        seleccionarJuegosDisponibles(juegos, function (opcion) {
-          if (opcion === -1) {
+        selectAvailableGames(games, function (option) {
+          if (option === -1) {
             menu();
           } else {
-            servicioWeb.invocar(
+            webService.invoke(
               'PUT',
-              '/gato/unir_juego/',
-              { id_juego: juegos[opcion].id },
-              verificarUnion
+              GAME_ROOT + 'join_game/',
+              { id_game: game[option].id },
+              varifyJoin
             );
           }
         });
@@ -455,13 +473,13 @@ function unirJuego() {
 
 //------------------------------------------------------------------------------
 
-titulo();
-imprimirNl();
-licencia();
+title();
+printnl();
+licese();
 
 if (process.argv.length !== 3) {
-  imprimirNl();
-  imprimirNl('Se debe indicar: http://<nombre de host>:<puerto>');
+  println();
+  println('Se debe indicar: http://<nombre de host>:<puerto>');
   process.exit(0);
 
 } else {

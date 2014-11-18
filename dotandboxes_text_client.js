@@ -487,3 +487,5 @@ if (process.argv.length !== 3) {
   stdin.resume();
   menu();
 }
+// End of text client.
+
