@@ -189,24 +189,20 @@ router.get(GAME_ROOT + 'state/', function (req, res) {
     			}
     		}
     	}
-    	console.log(players);
-    	var winnerCount = 0;
     	
+    	var winnerCount = 0;
     	for (var i = 0; i < players.length; i++) {
     		if (players[i].count > winnerCount) {
     			winnerCount = players[i].count;
     		}
     	}
-    	console.log(winnerCount);
     	
     	var winners = [];
-    	
     	for (var i = 0; i < players.length; i++) {
     		if (players[i].count === winnerCount) {
     			winners[winners.length] = players[i].symbol;
     		}
     	}
-    	console.log(winners);
     	
     	if (winners.length !== 1) {
     		return 'tie';
@@ -445,6 +441,8 @@ router.put(GAME_ROOT + 'join_game/', function (req, res) {
 	        	  game.save(callback);
         		}
         	});
+        	
+        	return callback(null, game, 0);
         }
       },
       //------------------------------------------------------------------------

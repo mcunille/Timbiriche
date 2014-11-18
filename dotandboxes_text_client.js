@@ -383,7 +383,6 @@ function readNumber(begin, end, label, callback) {
 //------------------------------------------------------------------------------
 // Print the license
 function license() {
-  console.log('Copyright (C) 2014 Mauricio Cunille, Jose Roberto Torres');
   console.log('This program is free software; you can redistribute it and/or ');
   console.log('modify it under the terms of the GNU General Public License as');
   console.log('published by the Free Software Foundation; either version 3 of');
@@ -441,8 +440,8 @@ function selectAvailableGames(games, callback) {
 
 //------------------------------------------------------------------------------
 function title() {
-  println('JUego de Timbiriche distribuido');
-  println('© 2014 por Mauricio Cunillé Blando y José Roberto Torres, ITESM CEM.');
+  println('Distributed Dots and Boxes Game - Timbiriche');
+  println('Copyright © 2014 por Mauricio Cunillé Blando y José Roberto Torres, ITESM CEM.');
 }
 
 //------------------------------------------------------------------------------

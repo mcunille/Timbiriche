@@ -368,9 +368,9 @@ function readNumber(begin, end, label, callback) {
 
     if (/^\d+$/.test(data)) {
       var num = parseInt(data);
-      //if (begin <= num && num <= end) {
+      if (begin <= num && num <= end) {
         validNumber = true;
-      //}
+      }
     }
     if (validNumber) {
       callback(num);
@@ -441,7 +441,7 @@ function selectAvailableGames(games, callback) {
 
 //------------------------------------------------------------------------------
 function title() {
-  println('JUego de Timbiriche distribuido');
+  println('Distributed Dots and Boxes Game - Timbiriche');
   println('© 2014 por Mauricio Cunillé Blando y José Roberto Torres, ITESM CEM.');
 }
 

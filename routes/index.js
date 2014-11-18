@@ -438,8 +438,11 @@ router.put(GAME_ROOT + 'join_game/', function (req, res) {
         	
         		if (players.length === game.players - 1) {
         			game.started = true;
-	        	  game.save(callback);
+        		} else {
+        			game.started = false;
         		}
+        		
+        	  game.save(callback);
         	});
         }
       },
