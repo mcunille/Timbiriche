@@ -115,7 +115,7 @@ $(document).ready(function() {
                     errorMessage("No hay juegos disponibles");
                 } else {
                     var gList = result.map(function(x) {
-                        return '<li value="' + x._id + '" class="game">' + scapeHtml(x.name) + '</li>'
+                        return '<li value="' + x.id + '" class="game">' + scapeHtml(x.name) + '</li>'
                     });
 
                     $('#games_list > ul').html(gList.join(''));
@@ -204,8 +204,8 @@ $(document).ready(function() {
     function joinGame() {
         eraseErrorMessage();
 
-        var id = $(this).val();
-        var symbol;
+        var id = $(this).attr("value");
+        var symbol = 'a';
 
         $.ajax({
             url: GAME_ROOT + 'join_game/',
