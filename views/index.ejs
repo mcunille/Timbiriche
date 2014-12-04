@@ -4,6 +4,7 @@
 		<meta charset="UTF-8" />
 		<title>Dots and Boxes Web Client</title>
 		<link rel='stylesheet' type="text/css" href='/stylesheets/style.css' />
+		<link rel="shortcut icon" href="/favicon.ico">
         <script type="text/javascript" src="/javascripts/jquery-1.11.1.min.js"></script>
         <script type="text/javascript" src="/javascripts/dots_and_boxes.js"></script>
 	</head>
@@ -43,8 +44,15 @@
 
             <div id="games_list" class="content_wrapper">
                 <h1>Selecciona un juego para unirte</h1>
+                <input id="guest_symbol" autocomplete="off" type="text" placeholder="Símbolo" pattern="[a-zA-Z]{1}" required>
                 <ul>
                 </ul>
+            </div>
+
+            <div id="board_wrapper">
+                <h1>Jugando ...</h1>
+                <table id="game_board">
+                </table>
             </div>
 
 		</section>
@@ -55,3 +63,4 @@
 		</footer>
 	</body>
 </html>
+

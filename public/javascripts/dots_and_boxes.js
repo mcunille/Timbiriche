@@ -1,4 +1,4 @@
-﻿/*
+/*
  Dots and Boxes distributed game.
  Web client.
  Copyright (C) 2014 by José Roberto Torres and Mauricio Cunillé Blando.
@@ -43,21 +43,25 @@ $(document).ready(function() {
         if(name === '') {
             isValid = false;
             errorMessage('El nombre del juego no puede quedar vacío.');
+            return false;
         }
 
         if(size === '') {
             isValid = false;
             errorMessage('Especifique un tamaño de juego válido.');
+            return false;
         }
 
         if(players === '') {
             isValid = false;
             errorMessage('Introdusca un número válido de jugadores. De 2 - 4.');
+            return false;
         }
 
         if(player_symbol === '') {
             isValid = false;
             errorMessage('Especifique su símbolo de juego.');
+            return false;
         }
 
         if(isValid) {
@@ -76,7 +80,13 @@ $(document).ready(function() {
                 success: function(result) {
                     var text;
                     if(result.created) {
-                        errorMessage('Juego creado')
+                        errorMessage('Por favor espera tu turno.');
+                        $('#main_menu_button').fadeOut(function() {
+                            $('#new_game').fadeOut("slow", function() {
+                                $('#board_wrapper').fadeIn("slow");
+                            });
+                        });
+                        waitTurn();
                     } else {
                         switch(result.code) {
 
@@ -115,7 +125,7 @@ $(document).ready(function() {
                     errorMessage("No hay juegos disponibles");
                 } else {
                     var gList = result.map(function(x) {
-                        return '<li value="' + x._id + '" class="game">' + scapeHtml(x.name) + '</li>'
+                        return '<li value="' + x.id + '" class="game">' + scapeHtml(x.name) + '</li>'
                     });
 
                     $('#games_list > ul').html(gList.join(''));
@@ -166,7 +176,9 @@ $(document).ready(function() {
                     switch(result.state) {
 
                         case 'your_turn':
-                            turnoTirar(result.board);
+                            updateBoard(result.board);
+                            errorMessage('<strong>Es tu turno.</strong>');
+                            $('.dash_active').click(makeMove);
                             break;
 
                         case 'wait':
@@ -174,19 +186,21 @@ $(document).ready(function() {
                             break;
 
                         case 'tie':
-                            actualizar(result.board);
                             finDeJuego('<strong>Empate.</strong>');
+                            updateBoard(result.board);
+                            errorMessage('<strong>Empate.</strong>');
                             break;
 
                         case 'win':
                             finDeJuego('<strong>Ganaste.</strong> ¡Felicidades!');
-                            resalta(result.board);
+                            updateBoard(result.board);
+                            errorMessage('<strong>Ganaste.</strong> ¡Felicidades!');
                             break;
 
                         case 'lost':
                             finDeJuego('<strong>Perdiste.</strong> ¡Lástima!');
-                            actualizar(result.board);
-                            resalta(result.board);
+                            updateBoard(result.board);
+                            errorMessage('<strong>Perdiste.</strong> ¡Lástima!');
                             break;
                     }
                 }
@@ -204,8 +218,13 @@ $(document).ready(function() {
     function joinGame() {
         eraseErrorMessage();
 
-        var id = $(this).val();
-        var symbol;
+        var id = $(this).attr("value");
+        var symbol = $('guest_symbol').val().trim();
+
+        if(symbol === '') {
+            errorMessage('Debes introducir tu símbolo');
+            return false;
+        }
 
         $.ajax({
             url: GAME_ROOT + 'join_game/',
@@ -214,8 +233,14 @@ $(document).ready(function() {
             data: { id_game: id, symbol: symbol },
             error: conexionError,
             success: function(result) {
-                if(result.joined && result.code === 'ok') {
+                if(result.joined) {
                     errorMessage('Por favor espera tu turno.');
+                    $('#main_menu_button').fadeOut("slow", function() {
+                        $('#games_list').fadeOut("slow", function() {
+                            $('#board_wrapper').fadeIn("slow");
+                        });
+                    });
+                    waitTurn();
                 }
                 else {
                     switch(result.code) {
@@ -243,17 +268,77 @@ $(document).ready(function() {
         });
     }
 
+    //---------------------------------------------------------------------------------
+
+    function updateBoard(board) {
+        var row = 0;
+        var col = 0;
+
+        var newBoard = board.map(function(x) {
+            return '<tr>' + x.map(function(y) {
+                if((row % 2) === 0 && (col % 2) === 0) {
+                    return '<td><p class="point">' + y + '</p></td>';
+                } else if((row % 2) !== 0 && (col % 2) !== 0) {
+                    (y === ' ') ? '<td><p class="letter">*</p></td>' : '<td><p class="letter">' + y + '</p></td>';
+                } else {
+                    if((row % 2) === 0) {
+                        return (y === ' ') ? '<td><p class="dash_active" tabindex="(' + row / 2 + ',' + col / 2 + '),(' + (row / 2 + row % 2) + ',' + (col / 2 + col % 2) + ')">--</p></td>' : '<td><p class="dash_inactive">' + y + '</p></td>';
+                    } else {
+                        return (y === ' ') ? '<td><p class="dash_active" tabindex="(' + row / 2 + ',' + col / 2 + '),(' + (row / 2 + row % 2) + ',' + (col / 2 + col % 2) + ')">|</p></td>' : '<td><p class="dash_inactive">' + y + '</p></td>';
+                    }
+                }
+            }) + '</tr>';
+        });
+
+        $('#game_board').html(newBoard.join(''));
+    }
+
+    //-------------------------------------------------------------------------------
     function showMainMenu() {
         eraseErrorMessage();
-        $('#new_game').fadeOut("slow", function() {
-            $('#main_menu_button').fadeOut("slow", function() {
-                $('#main_menu').fadeIn("slow");
+        if($('#new_game').is(':visible')) {
+            $('#new_game').fadeOut("slow", function() {
+                $('#main_menu_button').fadeOut("slow", function() {
+                    $('#main_menu').fadeIn("slow");
+                });
             });
-        });
+        }
+        else {
+            $('#games_list').fadeOut("slow", function() {
+                $('#main_menu_button').fadeOut("slow", function() {
+                    $('#main_menu').fadeIn("slow");
+                });
+            });
+        }
     }
 
     function eraseErrorMessage() {
         $('#error_message').fadeOut("slow");
         $('#error_message').html("");
+    }
+
+    //---------------------------------------------------------------------
+    function makeMove() {
+        eraseErrorMessage();
+
+        var x1 = 0;
+        var x2 = 0;
+        var y1 = 0;
+        var y2 = 0;
+
+        $.ajax({
+            url: GAME_ROOT + 'play/',
+            type: 'PUT',
+            dataType: 'json',
+            data: { 'x1': x1, 'x2': x2, 'y1': y1, 'y2': y2 },
+            error: conexionError,
+            success: function(result) {
+                if(result.done) {
+                    moveDone(result.board);
+                } else {
+                    moveNotDone(result.code);
+                }
+            }
+        });
     }
 });
