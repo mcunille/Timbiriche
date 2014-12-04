@@ -1,8 +1,10 @@
 h1 {
-  font-size: 20pt;
+	color: orange;
+	font-size: 20pt;
 }
 
 h2 {
+  color: #c0c0c0;
   font-size: 16pt;
 }
 
@@ -15,9 +17,28 @@ p {
 }
 
 .content-wrapper {
-  margin: 0px auto;
+	padding: 10px;
+	max-width: 920;
+}
+
+#titles {
+	text-align: center;
 }
 
 header, body, footer {
-  padding: 20px;
+	min-width: 920;
+}
+
+#main-content {
+	min-height: 720px;
+}
+
+body {
+	margin: 0px auto;
+}
+
+footer {
+	text-align: center;
+	color: white;
+	background-color: orange;
 }
