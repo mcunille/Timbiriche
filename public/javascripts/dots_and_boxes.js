@@ -1,4 +1,29 @@
+/*
+ Dots and Boxes distributed game.
+ Web client.
+ Copyright (C) 2014 by José Roberto Torres and Mauricio Cunillé Blando.
+
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+'use strict'
+
 var GAME_ROOT = '/dotsandboxes/';
+var PAUSE = 1000;
+
+//------------------------------------------------------------------------------
+$(document).ready(function () {
 
 //----------------------------------------------------------------------------
  function createGame() {
@@ -17,7 +42,7 @@ var GAME_ROOT = '/dotsandboxes/';
     
     if (size === '') {
       isValid = false;
-      mensajeError('Especifique un tamaño de juego válido.');
+      errorMessage('Especifique un tamaño de juego válido.');
     }
     
     if (players === '') {
@@ -41,14 +66,14 @@ var GAME_ROOT = '/dotsandboxes/';
           players: players,
           player_symbol: player_symbol
         },
-        error: conectionError,
+        error: conexionError,
         success: function(result) {
           var text;
           if (result.created) {
             $('div').hide();
-            $('#simbolo').html(resultado.simbolo);
+            $('#simbolo').html(result.symbol);
             $('#mensaje_1').html('Esperando a que alguien más se una al ' +
-              'juego <strong>' + scapeHtml(nombre) + '</strong>.');
+              'juego <strong>' + scapeHtml(name) + '</strong>.');
             $('#boton_mensajes_regresar_al_menu').hide();
             $('#seccion_mensajes').show();
             $('#seccion_tablero').show();
@@ -99,40 +124,40 @@ var GAME_ROOT = '/dotsandboxes/';
     $('body').css('cursor', 'wait');
 
     function ticToc() {
-      $('#mensaje_3').html('Llevas ' + secs + ' segundo' +
+      $('#message_3').html('Llevas ' + secs + ' segundo' +
         (secs === 1 ? '' : 's') + ' esperando.');
       secs++;
       $.ajax({
-        url: '/gato/estado/',
+        url: GAME_ROOT + 'state/',
         type: 'GET',
         dataType: 'json',
-        error: errorConexion,
-        success: function(resultado) {
+        error: conexionError,
+        success: function(result) {
 
-          switch (resultado.estado) {
+          switch (result.state) {
 
           case 'tu_turno':
-            turnoTirar(resultado.tablero);
+            turnoTirar(result.board);
             break;
 
-          case 'espera':
-            setTimeout(ticToc, PAUSA);
+          case 'wait':
+            setTimeout(ticToc, PAUSE);
             break;
 
-          case 'empate':
-            actualizar(resultado.tablero);
+          case 'tie':
+            actualizar(result.board);
             finDeJuego('<strong>Empate.</strong>');
             break;
 
-          case 'ganaste':
+          case 'win':
             finDeJuego('<strong>Ganaste.</strong> ¡Felicidades!');
-            resalta(resultado.tablero);
+            resalta(result.board);
             break;
 
-          case 'perdiste':
+          case 'lost':
             finDeJuego('<strong>Perdiste.</strong> ¡Lástima!');
-            actualizar(resultado.tablero);
-            resalta(resultado.tablero);
+            actualizar(result.board);
+            resalta(result.board);
             break;
           }
         }
@@ -140,3 +165,9 @@ var GAME_ROOT = '/dotsandboxes/';
     };
     setTimeout(ticToc, 0);
   };
+  
+  //----------------------------------------------------------------------------
+  function conexionError() {
+    errorMessage('No es posible conectarse al servidor.');
+  }
+});
