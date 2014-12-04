@@ -4,26 +4,52 @@
 		<meta charset="UTF-8" />
 		<title>Dots and Boxes Web Client</title>
 		<link rel='stylesheet' type="text/css" href='/stylesheets/style.css' />
+        <script type="text/javascript" src="/javascripts/jquery-1.11.1.min.js"></script>
+        <script type="text/javascript" src="/javascripts/dots_and_boxes.js"></script>
 	</head>
 	<body>
 		<header>
-			<div class="content-wrapper">
+			<div class="content_wrapper">
 				<hgroup id="titles">
 					<h1>Juego de Timbiriche</h1>
 					<h2>Desarrollo de aplicaciones web</h2>
 				</hgroup>
 			</div>
 		</header>
-		<section id="main-content">
-			<div class="content-wrapper">
+		<section id="main_content">
+            <div class="content_wrapper">
+                <button id="main_menu_button" value="meú principal">Menú principal</button>
+            </div>
+            <h3 id="error_message"></h3>
+			<div id="main_menu" class="content_wrapper">
 				<ul>
-					<li></li>
-					<li></li>
+					<li id="new_game_button"><div class="main_menu_option"><img alt="new game" src="/stylesheets/Plus.png"><p>crear un nuevo juego</p></div></li>
+					<li id="get_games_button"><div class="main_menu_option"><img alt="new game" src="/stylesheets/Look.png"><p>unirse a un juego existete</p></div></li>
 				</ul>
 			</div>
+
+            <div id="new_game" class="content_wrapper">
+                <form id="new_game_form">
+                    <h1>Nuevo juego</h1>
+                    <fieldset>
+                        <input id="game_name" name="name" autocomplete="off" type="text" placeholder="Nombre del juego" required>
+                        <input id="game_size" name="size" autocomplete="off" type="number" placeholder="Tamaño (5 - 10)" min="5" max="10" required>
+                        <input id="players_num" name="players" autocomplete="off" type="number" placeholder="Jugadores (2 - 4)" min="2" max="4" required>
+                        <input id="player_symbol" name="player_symbol" autocomplete="off" type="text" placeholder="Símbolo" pattern="[a-zA-Z]{1}" required>
+                        <input id="create_game_button" type="submit"  value="Crear">
+                    </fieldset>
+                </form>
+            </div>
+
+            <div id="games_list" class="content_wrapper">
+                <h1>Selecciona un juego para unirte</h1>
+                <ul>
+                </ul>
+            </div>
+
 		</section>
 		<footer>
-			<div class="content-wrapper">
+			<div class="content_wrapper">
 				<p>Copyright &copy; Jos&eacute; Roberto Torres Mancilla, Mauricio Cunill&eacute; Blando</p>
 			</div>
 		</footer>
