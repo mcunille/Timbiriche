@@ -219,7 +219,7 @@ $(document).ready(function() {
         eraseErrorMessage();
 
         var id = $(this).attr("value");
-        var symbol = $('guest_symbol').val().trim();
+        var symbol = $('#guest_symbol').val().trim();
 
         if(symbol === '') {
             errorMessage('Debes introducir tu símbolo');

@@ -235,11 +235,7 @@ $(document).ready(function() {
             success: function(result) {
                 if(result.joined) {
                     errorMessage('Por favor espera tu turno.');
-<<<<<<< HEAD
                     $('#main_menu_button').fadeOut("slow", function() {
-=======
-                    $('#main_menu_button').fadeOut(function() {
->>>>>>> 5a413044eac68b6aa6b19141609cbf55711234be
                         $('#games_list').fadeOut("slow", function() {
                             $('#board_wrapper').fadeIn("slow");
                         });
@@ -345,8 +341,4 @@ $(document).ready(function() {
             }
         });
     }
-<<<<<<< HEAD
 });
-=======
-});
->>>>>>> 5a413044eac68b6aa6b19141609cbf55711234be
