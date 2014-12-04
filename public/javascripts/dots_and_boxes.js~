@@ -219,7 +219,7 @@ $(document).ready(function() {
         eraseErrorMessage();
 
         var id = $(this).attr("value");
-        var symbol = $('guest_symbol').val().trim();
+        var symbol = $('#guest_symbol').val().trim();
 
         if(symbol === '') {
             errorMessage('Debes introducir tu símbolo');
@@ -271,20 +271,37 @@ $(document).ready(function() {
     //---------------------------------------------------------------------------------
 
     function updateBoard(board) {
-        var row = 0;
-        var col = 0;
+        var row = -1;
+        var col = -1;
 
         var newBoard = board.map(function(x) {
+	    col = -1;
+	    row++;
             return '<tr>' + x.map(function(y) {
+		col++;
                 if((row % 2) === 0 && (col % 2) === 0) {
                     return '<td><p class="point">' + y + '</p></td>';
                 } else if((row % 2) !== 0 && (col % 2) !== 0) {
-                    (y === ' ') ? '<td><p class="letter">*</p></td>' : '<td><p class="letter">' + y + '</p></td>';
+		    if (y === ' ') {
+				return '<td><p class="letter">*</p></td>';
+			
+			    } else {
+				return '<td><p class="letter">' + y + '</p></td>';
+			
+			    }
                 } else {
                     if((row % 2) === 0) {
-                        return (y === ' ') ? '<td><p class="dash_active" tabindex="(' + row / 2 + ',' + col / 2 + '),(' + (row / 2 + row % 2) + ',' + (col / 2 + col % 2) + ')">--</p></td>' : '<td><p class="dash_inactive">' + y + '</p></td>';
+			if(y === ' ') {
+			    return '<td><p class="dash_active" xM="'+col+'" yM="'+row+'">--</p></td>';
+			} else {
+			    return '<td><p class="dash_inactive">' + y + '</p></td>';
+			}
                     } else {
-                        return (y === ' ') ? '<td><p class="dash_active" tabindex="(' + row / 2 + ',' + col / 2 + '),(' + (row / 2 + row % 2) + ',' + (col / 2 + col % 2) + ')">|</p></td>' : '<td><p class="dash_inactive">' + y + '</p></td>';
+if(y === ' ') {
+			return '<td><p class="dash_active" xM="'+col+'" yM="'+row+'">|</p></td>';
+		    } else {
+			return '<td><p class="dash_inactive">' + y + '</p></td>';
+		    }
                     }
                 }
             }) + '</tr>';
@@ -321,11 +338,19 @@ $(document).ready(function() {
     function makeMove() {
         eraseErrorMessage();
 
-        var x1 = 0;
-        var x2 = 0;
-        var y1 = 0;
-        var y2 = 0;
+	var xM = $(this).attr("xM");
+	var yM = $(this).attr("yM");
 
+        var x1 = Math.floor(xM / 2);
+        var x2 = Math.floor(xM / 2) + (xM % 2);
+	var y1 = Math.floor(yM / 2);
+        var y2 = Math.floor(yM / 2) + (yM % 2);
+
+	alert(x1);
+	alert(x2);
+alert(y1);
+alert(y2);
+	
         $.ajax({
             url: GAME_ROOT + 'play/',
             type: 'PUT',
@@ -333,6 +358,7 @@ $(document).ready(function() {
             data: { 'x1': x1, 'x2': x2, 'y1': y1, 'y2': y2 },
             error: conexionError,
             success: function(result) {
+		alert(result.done);
                 if(result.done) {
                     moveDone(result.board);
                 } else {
