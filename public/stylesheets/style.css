@@ -1,8 +1,23 @@
-body {
-  padding: 50px;
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+h1 {
+  font-size: 20pt;
 }
 
-a {
-  color: #00B7FF;
+h2 {
+  font-size: 16pt;
+}
+
+p {
+  font-size: 14pt;
+}
+
+.small {
+  font-size: 10pt;
+}
+
+.content-wrapper {
+  margin: 0px auto;
+}
+
+header, body, footer {
+  padding: 20px;
 }
