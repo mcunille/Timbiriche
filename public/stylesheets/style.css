@@ -145,6 +145,18 @@ body {
     overflow: scroll;
 }
 
+#games_list input {
+    border: solid 3px orange;
+    background-color: white;
+    border-radius: 10px;
+    width: 250px;
+    display: table;
+    margin: 10px auto;
+    text-align: center;
+    color: #303030;
+    font-size: 18pt;
+}
+
 #games_list ul{
     width: 300px;
     display: table;
@@ -170,4 +182,45 @@ footer {
 
 footer .content_wrapper{
     background-color: orange;
+}
+
+/*GAME*/
+#board_wrapper {
+    display: none;
+    text-align: center;
+}
+
+#game_board {
+    min-width: 600px;
+    min-height: 600px;
+    margin: 20px auto;
+    border: solid 3px orange;
+}
+
+#game_board p {
+    font-size: 40pt;
+}
+
+#game_board .dash_active {
+    color: #b6ff00;
+    background-color: #f0f0f0;
+}
+
+#game_board .dash_active:hover {
+    cursor: pointer;
+    color: orange;
+    background-color: #b6ff00;
+}
+
+#game_board .dash_inactive {
+    color: orange;
+    background-color: white;
+}
+
+#game_board .letter {
+    color: #f00;
+}
+
+#game_board .point {
+    color: orange;
 }
