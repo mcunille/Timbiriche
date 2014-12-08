@@ -54,7 +54,7 @@ $(document).ready(function() {
 
         if(players === '') {
             isValid = false;
-            errorMessage('Introdusca un número válido de jugadores. De 2 - 4.');
+            errorMessage('Introduzca un número válido de jugadores. De 2 - 4.');
             return false;
         }
 
@@ -74,7 +74,7 @@ $(document).ready(function() {
                     name: name,
                     size: size,
                     players: players,
-                    player_symbol: player_symbol
+                    symbol: player_symbol
                 },
                 error: conexionError,
                 success: function(result) {
@@ -186,19 +186,16 @@ $(document).ready(function() {
                             break;
 
                         case 'tie':
-                            finDeJuego('<strong>Empate.</strong>');
                             updateBoard(result.board);
                             errorMessage('<strong>Empate.</strong>');
                             break;
 
                         case 'win':
-                            finDeJuego('<strong>Ganaste.</strong> ¡Felicidades!');
                             updateBoard(result.board);
                             errorMessage('<strong>Ganaste.</strong> ¡Felicidades!');
                             break;
 
                         case 'lost':
-                            finDeJuego('<strong>Perdiste.</strong> ¡Lástima!');
                             updateBoard(result.board);
                             errorMessage('<strong>Perdiste.</strong> ¡Lástima!');
                             break;
@@ -346,10 +343,6 @@ if(y === ' ') {
 	var y1 = Math.floor(yM / 2);
         var y2 = Math.floor(yM / 2) + (yM % 2);
 
-	alert(x1);
-	alert(x2);
-alert(y1);
-alert(y2);
 	
         $.ajax({
             url: GAME_ROOT + 'play/',
@@ -358,11 +351,16 @@ alert(y2);
             data: { 'x1': x1, 'x2': x2, 'y1': y1, 'y2': y2 },
             error: conexionError,
             success: function(result) {
-		alert(result.done);
                 if(result.done) {
-                    moveDone(result.board);
+                    updateBoard(result.board);
+										waitTurn();
                 } else {
-                    moveNotDone(result.code);
+                    if (result.code === 'invalid_turn') {
+    		errorMessage('El servidor ha experimentado un problema.');
+    	} else {
+      	errorMessage('ERROR: Tiro inválido.');
+      	waitTurn();
+      }
                 }
             }
         });

@@ -25,7 +25,7 @@ h1 {
 }
 
 h2 {
-  color: #b6ff00;
+  color: #006600;
   font-size: 16pt;
   border-bottom: solid 3px orange;
 }
@@ -94,7 +94,7 @@ body {
     text-align: center;
     width: 200px;
     height: 280px;;
-    background-color: #b6ff00;
+    background-color: #006600;
 }
 
 #main_menu ul li:hover, #main_menu_button:hover, #create_game_button:hover {
@@ -165,7 +165,7 @@ body {
 
 .game {
     list-style: none;
-    border: solid 3px #b6ff00;
+    border: solid 3px #006600;
     border-radius: 10px;
     background-color: white;
     margin: 10px auto;
@@ -202,14 +202,14 @@ footer .content_wrapper{
 }
 
 #game_board .dash_active {
-    color: #b6ff00;
+    color: #006600;
     background-color: #f0f0f0;
 }
 
 #game_board .dash_active:hover {
     cursor: pointer;
     color: orange;
-    background-color: #b6ff00;
+    background-color: #006600;
 }
 
 #game_board .dash_inactive {
